@@ -1,4 +1,4 @@
-import { chromium } from '/Users/gracebilliris/Projects/brick-by-brick/node_modules/@playwright/test/index.mjs'
+import { chromium, expect } from '/Users/gracebilliris/Projects/brick-by-brick/node_modules/@playwright/test/index.mjs'
 import assert from 'node:assert/strict'
 import { mkdir, readFile } from 'node:fs/promises'
 
@@ -14,10 +14,30 @@ try {
   const response = await page.goto(baseURL)
   assert.equal(response.status(), 200)
   await page.getByRole('heading', { name: /a little time/i }).waitFor()
+  await expect(page.locator('.discovery-card')).toHaveCount(6)
+  await page.getByRole('button', { name: 'Show 6 more places', exact: true }).click()
+  await expect(page.locator('.discovery-card')).toHaveCount(12)
+  while (await page.getByRole('button', { name: /Show .* more places/ }).count()) {
+    await page.getByRole('button', { name: /Show .* more places/ }).click()
+  }
+  await expect(page.locator('.discovery-card')).toHaveCount(21)
+  await page.locator('.discovery-filters').getByRole('button', { name: 'Nature', exact: false }).click()
+  assert.ok(await page.locator('.discovery-card').count() <= 6)
+  await page.getByRole('button', { name: /All little discoveries/ }).click()
+  await expect(page.locator('.discovery-card')).toHaveCount(6)
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.evaluate(() => window.scrollTo(0, 0))
+  const firstInput = await page.locator('#available-time').boundingBox()
+  assert.ok(firstInput.y + firstInput.height < 844, 'Preferences should be reachable in the first mobile screen')
   await page.locator('#starting-area').selectOption('Central')
   await page.locator('#available-time').fill('240')
   await page.locator('#budget').fill('0')
   await page.getByRole('button', { name: 'Generate itinerary' }).click()
+  await expect(page.locator('.itinerary-heading h3')).toBeFocused()
+  await expect(page.locator('.itinerary-heading h3')).toBeInViewport()
+  await page.getByRole('link', { name: /Change time, budget or interests/ }).click()
+  await expect(page.locator('#available-time')).toBeInViewport()
+  await page.setViewportSize({ width: 1440, height: 1000 })
   const stops = page.getByTestId('itinerary-stop')
   assert.ok(await stops.count() >= 2)
   const first = await stops.nth(0).locator('h4').innerText()
@@ -35,6 +55,9 @@ try {
   const count = await stops.count()
   await stops.last().getByRole('button', { name: `Remove ${removed}`, exact: true }).click()
   assert.equal(await stops.count(), count - 1)
+  while (!await page.getByRole('button', { name: `Add ${removed} to itinerary`, exact: true }).count()) {
+    await page.getByRole('button', { name: /Show .* more places/ }).click()
+  }
   await page.getByRole('button', { name: `Add ${removed} to itinerary`, exact: true }).click()
   assert.equal(await stops.count(), count)
   await page.getByRole('button', { name: 'Save plan', exact: false }).click()
@@ -69,6 +92,7 @@ try {
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
   await page.screenshot({ path: `artifacts/${label}-mobile.png`, fullPage: true })
   await page.emulateMedia({ media: 'print' })
+  await expect(page.getByRole('navigation', { name: 'Planner sections' })).toBeHidden()
   await page.pdf({ path: `artifacts/${label}-print.pdf`, format: 'A4' })
   await page.emulateMedia({ media: 'screen' })
 
@@ -77,7 +101,7 @@ try {
   assert.equal(await stops.count(), 0)
   await page.getByRole('heading', { name: 'A little room for possibility.' }).waitFor()
   assert.deepEqual(errors, [])
-  console.log(`${label}: generate, free budget, reorder, duration warning, remove/add, save/reload/privacy, share, JSON download, print, maps, mobile, empty plan: PASS`)
+  console.log(`${label}: mobile first-screen preferences, generated-result focus, progressive guide/filter reset; generate, free budget, reorder, duration warning, remove/add, save/reload/privacy, share, JSON download, print, maps, mobile, empty plan: PASS`)
 } finally {
   await browser.close()
 }

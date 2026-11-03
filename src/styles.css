@@ -21,5 +21,64 @@
   .stop-edit-row { flex-wrap: wrap; }
   .stop-actions button, .card-bottom button, .utility-button { min-height: 40px; }
 }
+@media screen {
+  .site-header { min-height: 88px; }
+  .site-header nav a { min-height: 44px; display: inline-flex; align-items: center; }
+  .hero { padding: 28px 0; gap: 5%; }
+  .hero h1 { font-size: clamp(38px, 4vw, 58px); margin-bottom: 16px; }
+  .hero-description { max-width: 470px; margin-bottom: 16px; font-size: 15px; line-height: 1.6; }
+  .hero-note { display: none; }
+  .hero-visual { max-width: 350px; justify-self: end; }
+  .hero-action { background: var(--green); color: #fffdf7; border: 0; padding: 12px 18px; border-radius: 6px; min-height: 44px; font-size: 14px; }
+  .hero-action span { line-height: 1; }
+  .trust-strip { padding: 12px 0; }
+  .planner-section { padding-top: 30px; }
+  .section-heading { margin-bottom: 20px; }
+  .planner-jumps { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .planner-jumps a { padding: 12px 14px; min-height: 44px; border: 1px solid #bdc9b5; border-radius: 6px; background: #edf0e5; text-decoration: none; font-size: 13px; font-weight: 600; }
+  .planner-jumps a:hover { background: #dfe7d5; }
+  .itinerary-heading h3 { scroll-margin-top: 24px; }
+  .itinerary-edit { display: inline-flex; align-items: center; min-height: 44px; margin: -12px 0 16px; font-size: 13px; }
+  .status-message { background: #eef2e5; padding: 10px 12px; border-radius: 5px; margin: 0 0 20px; align-items: flex-start; }
+  .disclaimer { margin-top: 20px; }
+  .quick-options button, .interest-choice, .button, .plan-buttons .button,
+  .stop-actions button, .utility-button, .card-bottom button,
+  .delete-favorite, .favorite-buttons .text-link, .discovery-filters button { min-height: 44px; }
+  .stop-actions button { min-width: 44px; }
+  .stop-edit-row input { min-height: 44px; font-size: 16px; }
+  .field input, .field select { font-size: 16px; }
+  .discovery-pagination { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 16px; padding-top: 24px; }
+  .discovery-pagination p { margin: 0; font-size: 13px; color: #53614e; }
+}
+@media screen and (max-width: 600px) {
+  .site-header { row-gap: 4px; padding: 10px 0; }
+  .site-header nav { gap: 8px; }
+  .site-header nav a { font-size: 12px; }
+  .hero { padding: 22px 0; gap: 0; }
+  .hero .eyebrow { font-size: 10px; margin-bottom: 10px; }
+  .hero h1 { font-size: 38px; letter-spacing: -1.5px; margin-bottom: 12px; }
+  .hero-description { font-size: 14px; line-height: 1.6; margin-bottom: 14px; }
+  .hero .text-link { font-size: 14px; }
+  .hero-visual, .trust-strip, .planner-section > .section-heading > p { display: none; }
+  .planner-section { padding-top: 22px; }
+  .section-heading h2 { font-size: 31px; }
+  .section-heading .eyebrow { margin-bottom: 8px; }
+  .planner-jumps { gap: 6px; }
+  .planner-jumps a { padding: 12px 8px; font-size: 12px; flex: 1; text-align: center; }
+  .preferences-panel, .itinerary-panel { padding: 20px; }
+  .panel-title { margin-bottom: 20px; }
+  .field > label, .field legend, .rain-choice b { font-size: 14px; }
+  .field > label > span, .field-hint, .form-footnote, .rain-choice small,
+  .remember-choice, .remember-choice small, .route-origin small { font-size: 12px; }
+  .interest-choice, .quick-options button, .button, .plan-buttons .button,
+  .stop-actions .remove-button, .utility-button { font-size: 13px; }
+  .stop-content > p, .card-body > p { font-size: 14px; }
+  .discovery-grid { gap: 16px; }
+  .card-art { aspect-ratio: 2.4; }
+  .stop-edit-row { gap: 12px; }
+  .stop-actions { margin-left: auto; }
+  .itinerary-heading h3 { font-size: 28px; }
+}
+@media print{.planner-jumps,.itinerary-edit{display:none!important}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
 @media print{:root{background:white;color:#111;font-size:12px}.app-shell{padding:0;max-width:none}.site-header{min-height:55px}.site-header nav,.edition,.hero,.trust-strip,.preferences-panel,.section-heading>p,.discovery-section,.saved-section,.site-footer,.status-message,.save-controls,.share-result,.stop-edit-row,.skip-link,.back-top{display:none!important}.planner-section{padding:20px 0}.planner-section>.section-heading{margin-bottom:20px}.section-heading h2{font-size:30px}.planner-grid{display:block}.itinerary-panel{border:0;padding:0}.itinerary-heading h3{font-size:29px}.plan-totals{padding:12px 0;margin-bottom:18px}.itinerary-stop{break-inside:avoid;padding:16px 0}.stop-content>p{font-size:11px}.directions-link{font-size:10px;overflow-wrap:anywhere}.disclaimer{background:none;border:1px solid #bbb;font-size:9px;margin-top:22px}.plan-warning{break-inside:avoid;background:none;color:#111}.route-badge{display:block}.wordmark{color:#111}.button{display:none}a{text-decoration:none}.empty-plan{padding:20px}.empty-plan .text-link{display:none}}

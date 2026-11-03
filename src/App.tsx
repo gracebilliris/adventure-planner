@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
   places, defaultPreferences, generatePlan, evaluatePlan,
   serializePlan, deserializePlan, saveFavorites, loadFavorites,
@@ -76,7 +76,9 @@ export default function App() {
   const [rememberArea, setRememberArea] = useState(false)
   const [status, setStatus] = useState('Your next little adventure starts here.')
   const [discoveryFilter, setDiscoveryFilter] = useState<Interest | 'all'>('all')
+  const [discoveryLimit, setDiscoveryLimit] = useState(6)
   const [shareLink, setShareLink] = useState('')
+  const itineraryTitle = useRef<HTMLHeadingElement>(null)
   const result = useMemo(() => evaluatePlan(plan), [plan])
   const selectedPlaces = plan.stops.map(stop => ({ stop, place: places.find(place => place.id === stop.placeId) }))
   const visiblePlaces = places.filter(place => discoveryFilter === 'all' || place.interests.includes(discoveryFilter))
@@ -94,11 +96,18 @@ export default function App() {
   function updatePreference<K extends keyof Preferences>(key: K, value: Preferences[K]) {
     setPreferences(previous => ({ ...previous, [key]: value }))
   }
+  function revealItinerary() {
+    window.requestAnimationFrame(() => {
+      itineraryTitle.current?.focus({ preventScroll: true })
+      itineraryTitle.current?.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
+    })
+  }
   function generate() {
     const next = generatePlan({ ...preferences, interests: [...preferences.interests] })
     setPlan(next)
     setShareLink('')
     setStatus(next.stops.length ? 'A fresh itinerary is ready. Make it your own below.' : 'No outing fits these preferences. Try more time, a higher budget, or different interests.')
+    revealItinerary()
   }
   function editStops(stops: Plan['stops'], message: string) {
     setPlan(previous => ({ ...previous, stops }))
@@ -186,7 +195,7 @@ export default function App() {
             <p className="eyebrow"><span className="tiny-line" /> LESS SCROLLING. MORE WANDERING.</p>
             <h1 id="hero-title">A little time.<br />A great <em>day out.</em></h1>
             <p className="hero-description">Big harbour energy. Small, lovely adventures. Turn a few free hours into a Sydney outing that feels like you.</p>
-            <a className="text-link" href="#planner">Find your little elsewhere <span aria-hidden="true">↘</span></a>
+            <a className="text-link hero-action" href="#preferences">Plan my afternoon <span aria-hidden="true">↘</span></a>
             <div className="hero-note"><span aria-hidden="true">✳</span> Made for the time you actually have.</div>
           </div>
           <div className="hero-visual">
@@ -204,8 +213,9 @@ export default function App() {
 
         <section className="planner-section" id="planner" aria-labelledby="planner-title">
           <div className="section-heading"><div><p className="eyebrow">01 / MAKE IT YOURS</p><h2 id="planner-title">Your afternoon, <em>your way.</em></h2></div><p>A few details. A little local inspiration.<br />Leave the overthinking to us.</p></div>
+          <nav className="planner-jumps" aria-label="Planner sections"><a href="#preferences">1. Set preferences</a><a href="#itinerary">2. Your itinerary</a><a href="#discover">3. Add a stop</a></nav>
           <div className="planner-grid">
-            <form className="preferences-panel" onSubmit={event => { event.preventDefault(); generate() }}>
+            <form className="preferences-panel" id="preferences" aria-label="Plan preferences" onSubmit={event => { event.preventDefault(); generate() }}>
               <div className="panel-title"><span className="small-number">01</span><h3>The essentials</h3></div>
               <div className="field">
                 <label htmlFor="available-time">How much time do you have?<span>Including walks between stops</span></label>
@@ -220,8 +230,10 @@ export default function App() {
               <p className="form-footnote">Curated suggestions, not a booking. Interests prioritise stops rather than restrict them.</p>
             </form>
 
-            <section className="itinerary-panel" aria-label="Itinerary">
-              <div className="itinerary-heading"><div><p className="eyebrow">YOUR LITTLE ESCAPE</p><h3>{plan.name || 'A Sydney kind of day'}</h3></div><span className="route-badge"><span aria-hidden="true">↗</span> ON FOOT</span></div>
+            <section className="itinerary-panel" id="itinerary" aria-label="Itinerary">
+              <div className="itinerary-heading"><div><p className="eyebrow">YOUR LITTLE ESCAPE</p><h3 ref={itineraryTitle} tabIndex={-1}>{plan.name || 'A Sydney kind of day'}</h3></div><span className="route-badge"><span aria-hidden="true">↗</span> ON FOOT</span></div>
+              <a className="text-link itinerary-edit" href="#preferences">Change time, budget or interests ↑</a>
+              <div className="status-message" role="status" aria-live="polite" aria-atomic="true"><span aria-hidden="true">✳</span> {status}</div>
               <div className="plan-totals" aria-label="Itinerary totals"><div><strong>{time(result.minutes)}</strong><span>total time</span></div><div><strong>{money(result.cost)}</strong><span>estimated spend</span></div><div><strong>{result.travelMinutes} <small>min</small></strong><span>walking estimate</span></div></div>
               <div className="route-origin"><span aria-hidden="true">◎</span><span>Set off from <b>{plan.preferences.area}</b><small>Time allowance: {time(plan.preferences.minutes)} · Budget: {money(plan.preferences.budget)}</small></span></div>
               {!result.valid && <div className="plan-warning" role="alert"><strong>A little adjustment needed</strong><ul>{result.issues.map((issue, index) => <li key={index}>{issue}</li>)}</ul><p>Your edits are kept. Remove a stop, shorten a visit, or regenerate with different preferences.</p></div>}
@@ -240,21 +252,21 @@ export default function App() {
               {shareLink && <div className="share-result"><label htmlFor="share-link">Your shareable link <span>Contains the itinerary and selected starting area.</span></label><input id="share-link" type="text" readOnly value={shareLink} onFocus={event => event.currentTarget.select()} /><small>Copy this link to share or keep it for later. Nothing is uploaded.</small></div>}
             </section>
           </div>
-          <div className="status-message" role="status" aria-live="polite" aria-atomic="true"><span aria-hidden="true">✳</span> {status}</div>
           <aside className="disclaimer"><strong>A note before you wander.</strong> Curated examples, not verified listings. Planning works offline once loaded; a fresh offline visit is not guaranteed. No accounts, location tracking, or planning APIs. All prices, visit durations and walking times are estimates—not live prices, opening hours, availability or traffic. Check venues, weather and accessibility before heading out. Walking estimates include your first leg but not the return journey; indoor stops do not mean covered walks. Maps opens an external service.</aside>
         </section>
 
         <section className="discovery-section" id="discover" aria-labelledby="discover-title">
           <div className="section-heading"><div><p className="eyebrow">02 / FOLLOW YOUR CURIOSITY</p><h2 id="discover-title">Good places.<br /><em>Little detours.</em></h2></div><p>A handpicked collection of Sydney favourites.<br />Add a stop. Take the scenic route.</p></div>
-          <div className="discovery-filters" aria-label="Filter places by interest"><button type="button" aria-pressed={discoveryFilter === 'all'} className={discoveryFilter === 'all' ? 'active' : ''} onClick={() => setDiscoveryFilter('all')}>All little discoveries <span>{places.length}</span></button>{interestOptions.map(option => <button key={option.value} type="button" aria-pressed={discoveryFilter === option.value} className={discoveryFilter === option.value ? 'active' : ''} onClick={() => setDiscoveryFilter(option.value)}><span aria-hidden="true">{option.icon}</span> {option.label}</button>)}</div>
-          <div className="discovery-grid">{visiblePlaces.map((place, index) => {
+          <div className="discovery-filters" aria-label="Filter places by interest"><button type="button" aria-pressed={discoveryFilter === 'all'} className={discoveryFilter === 'all' ? 'active' : ''} onClick={() => { setDiscoveryFilter('all'); setDiscoveryLimit(6) }}>All little discoveries <span>{places.length}</span></button>{interestOptions.map(option => <button key={option.value} type="button" aria-pressed={discoveryFilter === option.value} className={discoveryFilter === option.value ? 'active' : ''} onClick={() => { setDiscoveryFilter(option.value); setDiscoveryLimit(6) }}><span aria-hidden="true">{option.icon}</span> {option.label}</button>)}</div>
+          <div className="discovery-grid" id="place-results">{visiblePlaces.slice(0, discoveryLimit).map((place, index) => {
             const added = plan.stops.some(stop => stop.placeId === place.id)
             return <article className="discovery-card" key={place.id}><div className="card-art"><Illustration kind={place.interests[0]} variant={index} /><span className="card-price">{place.cost === 0 ? 'A FREE LITTLE JOY' : `EST. ${money(place.cost)}`}</span></div><div className="card-body"><div className="card-meta"><span>{place.area}</span><span>{place.duration} MIN</span></div><h3>{place.name}</h3><p>{place.description}</p><div className="card-bottom"><span>{place.rainy ? '☂ Indoor-friendly' : '☀ Out in the open'}</span><button type="button" disabled={added} aria-label={added ? `${place.name} already added` : `Add ${place.name} to itinerary`} onClick={() => addPlace(place)}>{added ? 'Added ✓' : 'Add stop + '}</button></div></div></article>
           })}</div>
+          <div className="discovery-pagination"><p role="status">Showing {Math.min(discoveryLimit, visiblePlaces.length)} of {visiblePlaces.length} places</p>{discoveryLimit < visiblePlaces.length && <button className="button button-secondary" type="button" aria-controls="place-results" onClick={() => setDiscoveryLimit(limit => limit + 6)}>Show {Math.min(6, visiblePlaces.length - discoveryLimit)} more places</button>}</div>
           <p className="discovery-caption">No sponsored spots. Just a few reasons to step outside your usual.</p>
         </section>
 
-        <section className="saved-section" id="saved" aria-labelledby="saved-title"><div className="section-heading"><div><p className="eyebrow">03 / FOR ANOTHER AFTERNOON</p><h2 id="saved-title">Keep a little <em>inspiration.</em></h2></div><p>Saved only when you choose.<br />On this browser, and nowhere else.</p></div>{favorites.length ? <div className="favorites-grid">{favorites.map(favorite => <article className="favorite-card" key={favorite.id}><span className="favorite-icon" aria-hidden="true">♡</span><div><h3>{favorite.name}</h3><p>{favorite.stops.length} stops · {time(favorite.preferences.minutes)} allowance</p><div className="favorite-buttons"><button className="text-link" type="button" onClick={() => { setPlan(favorite); setPreferences({ ...favorite.preferences, interests: [...favorite.preferences.interests] }); setShareLink(''); setStatus('Saved plan loaded. Review estimates before heading out.'); document.getElementById('planner')?.scrollIntoView({ behavior: 'smooth' }) }} aria-label={`Load ${favorite.name}`}>Load plan ↗</button><button className="delete-favorite" type="button" onClick={() => deleteFavorite(favorite.id)} aria-label={`Delete ${favorite.name}`}>Delete</button></div></div></article>)}</div> : <div className="saved-empty"><span aria-hidden="true">♡</span><div><h3>Good days are worth keeping.</h3><p>Use “Save plan” on an itinerary to find it here next time. Nothing is saved automatically.</p></div></div>}</section>
+        <section className="saved-section" id="saved" aria-labelledby="saved-title"><div className="section-heading"><div><p className="eyebrow">03 / FOR ANOTHER AFTERNOON</p><h2 id="saved-title">Keep a little <em>inspiration.</em></h2></div><p>Saved only when you choose.<br />On this browser, and nowhere else.</p></div>{favorites.length ? <div className="favorites-grid">{favorites.map(favorite => <article className="favorite-card" key={favorite.id}><span className="favorite-icon" aria-hidden="true">♡</span><div><h3>{favorite.name}</h3><p>{favorite.stops.length} stops · {time(favorite.preferences.minutes)} allowance</p><div className="favorite-buttons"><button className="text-link" type="button" onClick={() => { setPlan(favorite); setPreferences({ ...favorite.preferences, interests: [...favorite.preferences.interests] }); setShareLink(''); setStatus('Saved plan loaded. Review estimates before heading out.'); revealItinerary() }} aria-label={`Load ${favorite.name}`}>Load plan ↗</button><button className="delete-favorite" type="button" onClick={() => deleteFavorite(favorite.id)} aria-label={`Delete ${favorite.name}`}>Delete</button></div></div></article>)}</div> : <div className="saved-empty"><span aria-hidden="true">♡</span><div><h3>Good days are worth keeping.</h3><p>Use “Save plan” on an itinerary to find it here next time. Nothing is saved automatically.</p></div></div>}</section>
       </main>
       <footer className="site-footer"><a className="wordmark" href="#"><span className="brand-symbol">✳</span> little elsewhere.</a><p>A little local knowledge. A lot of possibility.</p><a className="back-top" href="#hero-title">Back to the sunshine ↑</a></footer>
     </div>
