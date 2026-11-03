@@ -10,6 +10,12 @@ const context = await browser.newContext({ viewport: { width: 1440, height: 1000
 const page = await context.newPage()
 const errors = []
 page.on('pageerror', error => errors.push(error.message))
+page.on('response', response => {
+  if (response.status() >= 400) errors.push(`${response.status()} ${response.url()}`)
+})
+page.on('request', request => {
+  if (new URL(request.url()).origin !== new URL(baseURL).origin) errors.push(`Unexpected external request: ${request.url()}`)
+})
 try {
   const response = await page.goto(baseURL)
   assert.equal(response.status(), 200)
@@ -21,6 +27,32 @@ try {
     await page.getByRole('button', { name: /Show .* more places/ }).click()
   }
   await expect(page.locator('.discovery-card')).toHaveCount(21)
+  const photoPaths = new Set()
+  for (const card of await page.locator('.discovery-card').all()) {
+    const image = card.locator('img')
+    await image.scrollIntoViewIfNeeded()
+    await expect.poll(() => image.evaluate(node => node.complete && node.naturalWidth > 0)).toBe(true)
+    assert.ok((await image.getAttribute('alt')).length > 20)
+    for (const source of (await image.getAttribute('srcset')).split(',')) photoPaths.add(source.trim().split(' ')[0])
+    await expect(card.locator('.photo-credit a')).toHaveCount(2)
+  }
+  for (const path of photoPaths) {
+    const photo = await context.request.get(new URL(path, baseURL).href)
+    assert.equal(photo.status(), 200, path)
+    assert.match(photo.headers()['content-type'], /image\/webp/, path)
+  }
+  await page.getByRole('link', { name: 'Photo credits', exact: true }).click()
+  await expect(page.locator('.photo-credits')).toHaveAttribute('open', '')
+  await expect(page.locator('.photo-credits li')).toHaveCount(21)
+  await expect(page.locator('.photo-credits')).toContainText('Resized', { ignoreCase: true })
+  await page.locator('.photo-credits summary').click()
+  const fallbackPage = await context.newPage()
+  await fallbackPage.route('**/photos/quay-promenade*.webp', route => route.abort())
+  await fallbackPage.goto(baseURL)
+  await expect(fallbackPage.getByRole('img', { name: /Photo unavailable:.*Circular Quay/ }).first()).toBeVisible()
+  await fallbackPage.getByRole('button', { name: 'Generate itinerary' }).click()
+  assert.ok(await fallbackPage.getByTestId('itinerary-stop').count() > 0)
+  await fallbackPage.close()
   await page.locator('.discovery-filters').getByRole('button', { name: 'Nature', exact: false }).click()
   assert.ok(await page.locator('.discovery-card').count() <= 6)
   await page.getByRole('button', { name: /All little discoveries/ }).click()
@@ -93,6 +125,8 @@ try {
   await page.screenshot({ path: `artifacts/${label}-mobile.png`, fullPage: true })
   await page.emulateMedia({ media: 'print' })
   await expect(page.getByRole('navigation', { name: 'Planner sections' })).toBeHidden()
+  await expect(page.locator('.stop-photo').first()).toBeHidden()
+  await expect(page.locator('.photo-credits')).toBeHidden()
   await page.pdf({ path: `artifacts/${label}-print.pdf`, format: 'A4' })
   await page.emulateMedia({ media: 'screen' })
 
@@ -101,7 +135,7 @@ try {
   assert.equal(await stops.count(), 0)
   await page.getByRole('heading', { name: 'A little room for possibility.' }).waitFor()
   assert.deepEqual(errors, [])
-  console.log(`${label}: mobile first-screen preferences, generated-result focus, progressive guide/filter reset; generate, free budget, reorder, duration warning, remove/add, save/reload/privacy, share, JSON download, print, maps, mobile, empty plan: PASS`)
+  console.log(`${label}: all21 destination photos decode, responsive image assets return200, credits/licenses, image failure fallback and no external image requests; mobile first-screen preferences, result focus, guide filters; generate, reorder, save/reload/privacy, share, download, text-only print, maps and empty plan: PASS`)
 } finally {
   await browser.close()
 }

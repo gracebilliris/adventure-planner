@@ -22,6 +22,14 @@ Choose a time allowance, estimated per-person AUD budget, interests, starting ne
 
 Save multiple favourite itineraries on this browser, load or delete them, print a readable itinerary, download a JSON copy, or copy a self-contained share link. JSON download is an export, not an import format. The Google Maps link opens a separate external service; it is not an embedded/live map. Standard keyboard controls, visible focus and a skip link are supported.
 
+## Destination photography
+
+All 21 destinations use photographs of the actual Sydney places, including Circular Quay promenade, rather than category illustrations. Photos are hosted with the app, in 480px and 960px WebP versions, with responsive selection and lazy loading. No external image service or tracking request is needed to display them.
+
+`src/placePhotos.json` records each photograph's original title, photographer, Commons source, licence, descriptive alt text and modifications. The app shows credits beside guide photos and a complete **Photo credits & licences** section. Photos retain their individual CC BY, CC BY-SA or CC0 terms; those licences apply to the photographs, not the application. Images have been resized/compressed and are cropped to fit the interface. Reference photographs do not guarantee current conditions.
+
+When replacing a file in `public/photos/`, verify the exact location and reuse permission, update both sizes and the corresponding manifest record, and retain the required attribution. Printed itineraries remain text-only.
+
 ## Data, privacy and limitations
 
 - Original curated descriptions are examples, not verified venue listings. No opening hours, current prices, availability, traffic, weather, bookings or accessible-route guarantees are provided. Check venues before travelling.

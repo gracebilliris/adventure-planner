@@ -79,6 +79,30 @@
   .stop-actions { margin-left: auto; }
   .itinerary-heading h3 { font-size: 28px; }
 }
-@media print{.planner-jumps,.itinerary-edit{display:none!important}}
+.hero-visual { margin: 0; }
+.hero-visual > .destination-image { width: 100%; height: 220px; }
+.destination-photo { margin: 0; }
+.destination-photo .card-art { aspect-ratio: 1.65; }
+.destination-image { display: block; object-fit: cover; background: #e8e4d6; }
+.card-art > .destination-image { width: 100%; height: 100%; }
+.destination-image[data-place="spice-alley"] { object-position: 50% 25%; }
+.destination-photo figcaption { padding: 8px 14px; background: #f0f1e7; border-bottom: 1px solid var(--line); }
+.photo-credit { display: block; font: 12px/1.6 Arial, Helvetica, sans-serif; color: #53614e; overflow-wrap: anywhere; }
+.photo-credit a { text-underline-offset: 3px; }
+.postcard-footer .photo-credit { margin-top: 8px; }
+.postcard-footer .stamp { flex-shrink: 0; margin-left: 10px; }
+.stop-photo { float: right; width: 96px; height: 72px; border-radius: 6px; margin: 0 0 12px 12px; }
+.stop-content h4 { overflow-wrap: anywhere; }
+.stop-edit-row { clear: both; }
+.photo-unavailable { display: grid; place-items: center; padding: 8px; background: #e5e9dc; color: #53614e; text-align: center; font-size: 12px; }
+.card-art > .photo-unavailable { width: 100%; height: 100%; }
+.hero-visual > .photo-unavailable { min-height: 200px; }
+.photo-credits { padding: 20px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 24px; }
+.photo-credits summary { cursor: pointer; min-height: 44px; padding: 12px 0; font-size: 14px; font-weight: 600; }
+.photo-credits > p { font-size: 13px; line-height: 1.8; max-width: 760px; color: #53614e; }
+.photo-credits ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; padding: 0; }
+.photo-credits li { min-width: 0; font-size: 14px; }
+.photo-title { display: block; font-size: 12px; line-height: 1.6; margin: 6px 0; color: #53614e; overflow-wrap: anywhere; }
+@media print{.planner-jumps,.itinerary-edit,.stop-photo,.photo-credits{display:none!important}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
 @media print{:root{background:white;color:#111;font-size:12px}.app-shell{padding:0;max-width:none}.site-header{min-height:55px}.site-header nav,.edition,.hero,.trust-strip,.preferences-panel,.section-heading>p,.discovery-section,.saved-section,.site-footer,.status-message,.save-controls,.share-result,.stop-edit-row,.skip-link,.back-top{display:none!important}.planner-section{padding:20px 0}.planner-section>.section-heading{margin-bottom:20px}.section-heading h2{font-size:30px}.planner-grid{display:block}.itinerary-panel{border:0;padding:0}.itinerary-heading h3{font-size:29px}.plan-totals{padding:12px 0;margin-bottom:18px}.itinerary-stop{break-inside:avoid;padding:16px 0}.stop-content>p{font-size:11px}.directions-link{font-size:10px;overflow-wrap:anywhere}.disclaimer{background:none;border:1px solid #bbb;font-size:9px;margin-top:22px}.plan-warning{break-inside:avoid;background:none;color:#111}.route-badge{display:block}.wordmark{color:#111}.button{display:none}a{text-decoration:none}.empty-plan{padding:20px}.empty-plan .text-link{display:none}}

@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { DestinationPhoto, PhotoCredit, destinationPhotos } from './DestinationPhoto'
 import {
   places, defaultPreferences, generatePlan, evaluatePlan,
   serializePlan, deserializePlan, saveFavorites, loadFavorites,
@@ -24,47 +25,6 @@ function initialPlan(): Plan {
     } catch { /* An incomplete link should not prevent a fresh outing. */ }
   }
   return generatePlan({ ...defaultPreferences, interests: [...defaultPreferences.interests] })
-}
-
-function Illustration({ kind = 'views', variant = 0, panorama = false }: { kind?: Interest; variant?: number; panorama?: boolean }) {
-  const warm = variant % 2 === 0
-  return (
-    <svg className={panorama ? 'panorama' : 'place-art'} viewBox="0 0 600 360" role="img" aria-label={panorama ? 'Illustrated Sydney harbour with a ferry, sails, and leafy shoreline' : `Decorative ${kind} illustration`}>
-      <rect width="600" height="360" fill={warm ? '#e8e4d6' : '#ecd8c7'} />
-      <circle cx="465" cy="79" r="42" fill="#dca96c" />
-      <path d="M0 221Q130 180 260 219T600 205V360H0Z" fill="#96ada8" />
-      <path d="M0 266Q160 240 325 270T600 254V360H0Z" fill="#6e9692" />
-      {panorama || kind === 'views' ? <>
-        <path d="M78 210V135Q206 5 341 135V210M78 139H341M93 123V208M119 100V208M148 81V208M180 70V208M212 68V208M244 77V208M275 92V208M307 111V208M328 131V208" fill="none" stroke="#30483e" strokeWidth="5" />
-        <path d="M62 205H352V220H62Z" fill="#30483e" />
-        <path d="M363 220Q355 169 377 119L422 220Z" fill="#faf6e9" />
-        <path d="M402 221Q396 152 431 108L467 221Z" fill="#fffbed" />
-        <path d="M443 221Q451 175 480 158L497 221Z" fill="#f3eddb" />
-        <path d="M353 223H507L492 235H363Z" fill="#b36b4d" />
-        <path d="M258 283H355L342 299H271Z" fill="#f7efdb" />
-        <path d="M277 264H332V283H277Z" fill="#d1a153" /><path d="M285 270H296M305 270H316" stroke="#36544a" strokeWidth="7" />
-      </> : kind === 'nature' ? <>
-        <path d="M0 307Q150 215 302 295T600 279V360H0Z" fill="#3c6350" />
-        <path d="M170 300V125M167 199Q68 188 101 93Q181 89 170 184M175 238Q269 218 247 141Q174 133 175 218M418 321V175M418 236Q342 220 362 157Q422 158 418 222M424 272Q496 256 474 193Q417 193 424 254" fill="#52765b" stroke="#2f4d3e" strokeWidth="8" />
-        <path d="M257 360Q231 303 329 287Q363 278 385 258" fill="none" stroke="#d6c6a2" strokeWidth="30" />
-      </> : kind === 'culture' ? <>
-        <path d="M114 158L300 72L486 158Z" fill="#a96b50" />
-        <path d="M129 166H471V182H129ZM115 292H485V308H115Z" fill="#f6efdb" />
-        {[155, 225, 295, 365, 435].map(x => <g key={x}><path d={`M${x} 187V284`} stroke="#f8f2e3" strokeWidth="25" /><path d={`M${x - 17} 187H${x + 17}M${x - 17} 284H${x + 17}`} stroke="#c3b496" strokeWidth="7" /></g>)}
-        <path d="M98 313H502V327H98Z" fill="#b08b6e" />
-      </> : <>
-        <ellipse cx="296" cy="292" rx="183" ry="25" fill="#b7a88e" />
-        <ellipse cx="264" cy="269" rx="127" ry="30" fill="#f7f1df" />
-        <path d="M175 249Q186 170 265 172Q342 170 352 249Z" fill="#b97940" />
-        <path d="M211 191L230 231M255 181L271 228M299 190L313 231" stroke="#e5b369" strokeWidth="12" strokeLinecap="round" />
-        <path d="M382 195H451V260Q416 292 382 260Z" fill="#fff9ea" /><path d="M451 204Q493 201 480 232Q471 246 451 239" fill="none" stroke="#fff9ea" strokeWidth="10" />
-        <path d="M401 169Q383 147 405 129M429 165Q412 143 433 119" fill="none" stroke="#a98167" strokeWidth="4" strokeLinecap="round" />
-      </>}
-      {panorama && <><path d="M0 360V198Q55 210 68 277Q37 272 24 247Q73 275 96 360" fill="#3e6047" /><path d="M600 360V165Q535 174 535 250Q568 236 581 205Q541 268 522 360" fill="#3e6047" /></>}
-      <path d="M36 323H112M453 314H520M381 338H420" stroke="#e5e9db" strokeWidth="3" strokeLinecap="round" />
-      <path d="M343 51q9-10 18 0q9-10 18 0" fill="none" stroke="#486152" strokeWidth="3" />
-    </svg>
-  )
 }
 
 export default function App() {
@@ -198,11 +158,11 @@ export default function App() {
             <a className="text-link hero-action" href="#preferences">Plan my afternoon <span aria-hidden="true">↘</span></a>
             <div className="hero-note"><span aria-hidden="true">✳</span> Made for the time you actually have.</div>
           </div>
-          <div className="hero-visual">
+          <figure className="hero-visual">
             <div className="art-caption"><span>POSTCARD NO. 001</span><span>33.87° S · 151.21° E</span></div>
-            <Illustration panorama />
-            <div className="postcard-footer"><span>Somewhere between here<br />and a very good afternoon.</span><span className="stamp" aria-hidden="true">SYDNEY<br /><b>↗</b><br />ON FOOT</span></div>
-          </div>
+            <DestinationPhoto placeId="quay-promenade" className="panorama" eager />
+            <figcaption className="postcard-footer"><span>Circular Quay promenade<br /><PhotoCredit placeId="quay-promenade" /></span><span className="stamp" aria-hidden="true">SYDNEY<br /><b>↗</b><br />ON FOOT</span></figcaption>
+          </figure>
         </section>
 
         <aside className="trust-strip" aria-label="About this planner">
@@ -243,7 +203,9 @@ export default function App() {
                   <div className="walking-leg"><span aria-hidden="true">⋮</span> {result.legs[index] ?? 0} min estimated walk{index === 0 ? ' to your first stop' : ''}</div>
                   <article className="itinerary-stop" data-testid="itinerary-stop" aria-label={`Stop ${index + 1}: ${place?.name ?? 'Unknown place'}`}>
                     <span className="stop-number">{String(index + 1).padStart(2, '0')}</span>
-                    <div className="stop-content"><div className="stop-category">{place?.interests.map(interest => interestOptions.find(option => option.value === interest)?.label).join(' / ') ?? 'Unavailable place'}{place?.rainy && <span> · INDOOR-FRIENDLY</span>}</div><h4>{place?.name ?? 'Unknown place'}</h4><p>{place?.description ?? 'This stop is no longer in our guide. Remove it and choose another.'}</p><div className="stop-details"><span>{place ? place.cost === 0 ? 'Free to explore' : `${money(place.cost)} estimated` : 'Cost unavailable'}</span><span>{place?.area}</span></div><div className="stop-edit-row"><label htmlFor={`duration-${index}`}>Visit <input id={`duration-${index}`} aria-label={`Duration at ${place?.name ?? 'unknown place'} in minutes`} type="number" min="5" max="360" value={stop.duration} onChange={event => editStops(plan.stops.map((entry, stopIndex) => stopIndex === index ? { ...entry, duration: Number(event.target.value) } : entry), 'Visit duration updated. Totals have been recalculated.')} /> min</label><div className="stop-actions"><button type="button" aria-label={`Move ${place?.name ?? 'unknown place'} up`} disabled={index === 0} onClick={() => moveStop(index, -1)}>↑</button><button type="button" aria-label={`Move ${place?.name ?? 'unknown place'} down`} disabled={index === plan.stops.length - 1} onClick={() => moveStop(index, 1)}>↓</button><button className="remove-button" type="button" aria-label={`Remove ${place?.name ?? 'unknown place'}`} onClick={() => editStops(plan.stops.filter((_, stopIndex) => stopIndex !== index), `${place?.name ?? 'Stop'} removed.`)}>Remove</button></div></div></div>
+                    <div className="stop-content">
+                      {place && <DestinationPhoto placeId={place.id} className="stop-photo" />}
+                      <div className="stop-category">{place?.interests.map(interest => interestOptions.find(option => option.value === interest)?.label).join(' / ') ?? 'Unavailable place'}{place?.rainy && <span> · INDOOR-FRIENDLY</span>}</div><h4>{place?.name ?? 'Unknown place'}</h4><p>{place?.description ?? 'This stop is no longer in our guide. Remove it and choose another.'}</p><div className="stop-details"><span>{place ? place.cost === 0 ? 'Free to explore' : `${money(place.cost)} estimated` : 'Cost unavailable'}</span><span>{place?.area}</span></div><div className="stop-edit-row"><label htmlFor={`duration-${index}`}>Visit <input id={`duration-${index}`} aria-label={`Duration at ${place?.name ?? 'unknown place'} in minutes`} type="number" min="5" max="360" value={stop.duration} onChange={event => editStops(plan.stops.map((entry, stopIndex) => stopIndex === index ? { ...entry, duration: Number(event.target.value) } : entry), 'Visit duration updated. Totals have been recalculated.')} /> min</label><div className="stop-actions"><button type="button" aria-label={`Move ${place?.name ?? 'unknown place'} up`} disabled={index === 0} onClick={() => moveStop(index, -1)}>↑</button><button type="button" aria-label={`Move ${place?.name ?? 'unknown place'} down`} disabled={index === plan.stops.length - 1} onClick={() => moveStop(index, 1)}>↓</button><button className="remove-button" type="button" aria-label={`Remove ${place?.name ?? 'unknown place'}`} onClick={() => editStops(plan.stops.filter((_, stopIndex) => stopIndex !== index), `${place?.name ?? 'Stop'} removed.`)}>Remove</button></div></div></div>
                   </article>
                 </div>)}
               </div>
@@ -258,17 +220,28 @@ export default function App() {
         <section className="discovery-section" id="discover" aria-labelledby="discover-title">
           <div className="section-heading"><div><p className="eyebrow">02 / FOLLOW YOUR CURIOSITY</p><h2 id="discover-title">Good places.<br /><em>Little detours.</em></h2></div><p>A handpicked collection of Sydney favourites.<br />Add a stop. Take the scenic route.</p></div>
           <div className="discovery-filters" aria-label="Filter places by interest"><button type="button" aria-pressed={discoveryFilter === 'all'} className={discoveryFilter === 'all' ? 'active' : ''} onClick={() => { setDiscoveryFilter('all'); setDiscoveryLimit(6) }}>All little discoveries <span>{places.length}</span></button>{interestOptions.map(option => <button key={option.value} type="button" aria-pressed={discoveryFilter === option.value} className={discoveryFilter === option.value ? 'active' : ''} onClick={() => { setDiscoveryFilter(option.value); setDiscoveryLimit(6) }}><span aria-hidden="true">{option.icon}</span> {option.label}</button>)}</div>
-          <div className="discovery-grid" id="place-results">{visiblePlaces.slice(0, discoveryLimit).map((place, index) => {
+          <div className="discovery-grid" id="place-results">{visiblePlaces.slice(0, discoveryLimit).map(place => {
             const added = plan.stops.some(stop => stop.placeId === place.id)
-            return <article className="discovery-card" key={place.id}><div className="card-art"><Illustration kind={place.interests[0]} variant={index} /><span className="card-price">{place.cost === 0 ? 'A FREE LITTLE JOY' : `EST. ${money(place.cost)}`}</span></div><div className="card-body"><div className="card-meta"><span>{place.area}</span><span>{place.duration} MIN</span></div><h3>{place.name}</h3><p>{place.description}</p><div className="card-bottom"><span>{place.rainy ? '☂ Indoor-friendly' : '☀ Out in the open'}</span><button type="button" disabled={added} aria-label={added ? `${place.name} already added` : `Add ${place.name} to itinerary`} onClick={() => addPlace(place)}>{added ? 'Added ✓' : 'Add stop + '}</button></div></div></article>
+            return <article className="discovery-card" key={place.id}>
+              <figure className="destination-photo">
+                <div className="card-art"><DestinationPhoto placeId={place.id} /><span className="card-price">{place.cost === 0 ? 'A FREE LITTLE JOY' : `EST. ${money(place.cost)}`}</span></div>
+                <figcaption><PhotoCredit placeId={place.id} /></figcaption>
+              </figure>
+              <div className="card-body"><div className="card-meta"><span>{place.area}</span><span>{place.duration} MIN</span></div><h3>{place.name}</h3><p>{place.description}</p><div className="card-bottom"><span>{place.rainy ? '☂ Indoor-friendly' : '☀ Out in the open'}</span><button type="button" disabled={added} aria-label={added ? `${place.name} already added` : `Add ${place.name} to itinerary`} onClick={() => addPlace(place)}>{added ? 'Added ✓' : 'Add stop + '}</button></div></div>
+            </article>
           })}</div>
           <div className="discovery-pagination"><p role="status">Showing {Math.min(discoveryLimit, visiblePlaces.length)} of {visiblePlaces.length} places</p>{discoveryLimit < visiblePlaces.length && <button className="button button-secondary" type="button" aria-controls="place-results" onClick={() => setDiscoveryLimit(limit => limit + 6)}>Show {Math.min(6, visiblePlaces.length - discoveryLimit)} more places</button>}</div>
           <p className="discovery-caption">No sponsored spots. Just a few reasons to step outside your usual.</p>
         </section>
 
         <section className="saved-section" id="saved" aria-labelledby="saved-title"><div className="section-heading"><div><p className="eyebrow">03 / FOR ANOTHER AFTERNOON</p><h2 id="saved-title">Keep a little <em>inspiration.</em></h2></div><p>Saved only when you choose.<br />On this browser, and nowhere else.</p></div>{favorites.length ? <div className="favorites-grid">{favorites.map(favorite => <article className="favorite-card" key={favorite.id}><span className="favorite-icon" aria-hidden="true">♡</span><div><h3>{favorite.name}</h3><p>{favorite.stops.length} stops · {time(favorite.preferences.minutes)} allowance</p><div className="favorite-buttons"><button className="text-link" type="button" onClick={() => { setPlan(favorite); setPreferences({ ...favorite.preferences, interests: [...favorite.preferences.interests] }); setShareLink(''); setStatus('Saved plan loaded. Review estimates before heading out.'); revealItinerary() }} aria-label={`Load ${favorite.name}`}>Load plan ↗</button><button className="delete-favorite" type="button" onClick={() => deleteFavorite(favorite.id)} aria-label={`Delete ${favorite.name}`}>Delete</button></div></div></article>)}</div> : <div className="saved-empty"><span aria-hidden="true">♡</span><div><h3>Good days are worth keeping.</h3><p>Use “Save plan” on an itinerary to find it here next time. Nothing is saved automatically.</p></div></div>}</section>
+        <details className="photo-credits" id="photo-credits">
+          <summary>Photo credits &amp; licences · {places.length} locations</summary>
+          <p>Real photographs of the featured places, sourced from Wikimedia Commons. Photos are resized, WebP-compressed and cropped to fit; each retains the licence linked below. They are reference photographs, not live views or guarantees of current conditions.</p>
+          <ul>{places.map(place => <li key={place.id}><strong>{place.name}</strong><span className="photo-title">{destinationPhotos[place.id].title}</span><PhotoCredit placeId={place.id} /></li>)}</ul>
+        </details>
       </main>
-      <footer className="site-footer"><a className="wordmark" href="#"><span className="brand-symbol">✳</span> little elsewhere.</a><p>A little local knowledge. A lot of possibility.</p><a className="back-top" href="#hero-title">Back to the sunshine ↑</a></footer>
+      <footer className="site-footer"><a className="wordmark" href="#"><span className="brand-symbol">✳</span> little elsewhere.</a><p>A little local knowledge. A lot of possibility.</p><a className="back-top" href="#photo-credits" onClick={() => { const credits = document.getElementById('photo-credits') as HTMLDetailsElement | null; if (credits) credits.open = true }}>Photo credits</a><a className="back-top" href="#hero-title">Back to the sunshine ↑</a></footer>
     </div>
   )
 }
